@@ -48,12 +48,40 @@ def main():
 
 # This function will load the users.csv file into the users table, discarding any records with incomplete data
 def load_and_clean_users(file_path):
-
+    with open(file_path, 'r') as users:
+        read= csv.reader(users)
+        header=next(read)
+        for row in read:
+            if len(row)!=2:
+                continue
+            elif len(row)==2:
+                firstName=row[0].strip()
+                lastName=row[1].strip()
+                if firstName == '' or lastName == '':
+                    continue
+                else:
+                    cursor.execute("INSERT INTO users (firstName,lastName) VALUES (?,?)",(firstName, lastName))
     print("TODO: load_users")
 
 
 # This function will load the callLogs.csv file into the callLogs table, discarding any records with incomplete data
 def load_and_clean_call_logs(file_path):
+    with open(file_path, 'r') as callLogs:
+        read= csv.reader(callLogs)
+        header=next(read)
+        for row in read:
+            if len(row)!=5:
+                continue
+            elif len(row)==5:
+                phoneNumber=row[0].strip()
+                startTime=row[1].strip()
+                endTime=row[2].strip()
+                direction=row[3].strip()
+                userId=row[4].strip()
+                if phoneNumber == '' or startTime == '' or endTime == ''  or direction == '' or userId == '':
+                    continue
+                else:
+                    cursor.execute("INSERT INTO callLogs(phoneNumber, startTime, endTime, direction, userId) VALUES (?,?,?,?,?)",(phoneNumber, startTime, endTime, direction, userId))
 
     print("TODO: load_call_logs")
 
@@ -62,14 +90,28 @@ def load_and_clean_call_logs(file_path):
 # You must save records consisting of each userId, avgDuration, and numCalls
 # example: 1,105.0,4 - where 1 is the userId, 105.0 is the avgDuration, and 4 is the numCalls.
 def write_user_analytics(csv_file_path):
-
+    cursor.execute("SELECT userId,round(avg(endTime-startTime),1) as avgDuration,count(*) as numCalls FROM callLogs GROUP BY userId")
+    rows=cursor.fetchall()
+    with open(csv_file_path , 'w', newline='') as testUserAnalytics:
+        write=csv.writer(testUserAnalytics)
+        write.writerow(['userId', 'avgDuration', 'numCalls'])
+        for row in rows:
+            write.writerow(row)
+        
     print("TODO: write_user_analytics")
 
 
 # This function will write the callLogs ordered by userId, then start time.
 # Then, write the ordered callLogs to orderedCalls.csv
 def write_ordered_calls(csv_file_path):
-
+    cursor.execute("SELECT callId, phoneNumber, startTime, endTime, direction, userId FROM callLogs ORDER BY userId, startTime")
+    rows=cursor.fetchall()
+    with open(csv_file_path , 'w', newline='') as orderedCalls:
+        write=csv.writer(orderedCalls)
+        write.writerow(['callId','phoneNumber', 'startTime', 'endTime', 'direction', 'userId'])
+        for row in rows:
+            write.writerow(row)
+    
     print("TODO: write_ordered_calls")
 
 
